@@ -292,6 +292,28 @@ class Player {
     this.isDroppingThrough = false;
   }
 
+  triggerJump() {
+    // Check swing timer if in minigame
+    const inMinigame = (typeof currentState !== 'undefined') && (currentState === GAME_STATE.SECRET_MINIGAME_ROOM);
+    const swingActive = inMinigame && (typeof minigameSwingTimer !== 'undefined') && (minigameSwingTimer > 0);
+    
+    if (!this.isCharging && !swingActive) {
+      if (this.isGrounded) {
+        this.vy = this.jumpForce;
+        this.isGrounded = false;
+        this.doubleJumpAvailable = true;
+        AudioEffects.playJump();
+      } else if (this.doubleJumpAvailable) {
+        this.vy = this.jumpForce * 0.9;
+        this.doubleJumpAvailable = false;
+        AudioEffects.playJump();
+        if (typeof spawnParticles === 'function') {
+          spawnParticles(this.x + this.width / 2, this.y + this.height, '#ffffff', 8);
+        }
+      }
+    }
+  }
+
   update() {
     // Handle Drop-Through timer
     if (this.dropThroughTimer > 0) {
@@ -4828,7 +4850,11 @@ tick();
   // Buttons Touch Handlers
   btnTouchJump.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    simulateKeyDown(' '); // Space simulates Jump
+    if (typeof player !== 'undefined' && typeof player.triggerJump === 'function') {
+      player.triggerJump();
+    } else {
+      simulateKeyDown(' ');
+    }
   }, { passive: false });
 
   btnTouchJump.addEventListener('touchend', (e) => {
