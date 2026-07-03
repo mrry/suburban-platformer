@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suburban 16-Bit Platformer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>SUBURBAN RETRO RUNNER</h1>
+
+  <div class="app-container">
+    
+    <!-- Left Column: Arcade Monitor -->
+    <div class="game-screen-wrapper">
+      <div class="crt-monitor">
+        <canvas id="gameCanvas" width="800" height="533"></canvas>
+      </div>
+      
+      <div class="game-hud-bottom">
+        <div>SCORE: <span id="hud-score">000000</span></div>
+        <div class="restart-prompt">PRESS 'R' TO RESTART</div>
+        <div>HP: <span id="hud-hp">❤❤❤</span></div>
+      </div>
+    </div>
+
+    <!-- Right Column: Dashboard & Customizers -->
+    <div class="control-sidebar">
+      
+      <!-- Character Customizer Panel -->
+      <div class="panel">
+        <div class="panel-title">HERO CUSTOMIZER</div>
+        
+        <div class="customizer-layout">
+          <!-- Face Customizer -->
+          <div class="face-customizer-section">
+            <div id="upload-zone" class="face-upload-container">
+              <input type="file" id="face-input" accept="image/*">
+              <div class="upload-prompt">
+                <span class="upload-icon">📷</span>
+                <p>Drag & Drop or Click to Upload Face</p>
+                <span>PNG, JPG (Square recommended)</span>
+              </div>
+            </div>
+
+            <!-- Shown when a face is uploaded/snapped -->
+            <div id="face-preview-wrapper" class="face-preview-area">
+              <div class="face-preview-container">
+                <canvas id="preview-canvas" class="face-preview-canvas" width="128" height="128"></canvas>
+              </div>
+              <div class="face-preview-info">
+                <h4>Face Loaded!</h4>
+                <p id="face-status">Scale: High-Res Photo</p>
+                <p style="font-size: 8px; color: var(--primary-glow); margin-top: 4px; text-transform: uppercase; line-height: 1.3;">Drag on picture to erase background</p>
+                <button type="button" id="btn-remove-face" class="btn btn-secondary" style="padding: 4px 8px; font-size: 10px; margin-top: 4px; flex: none;">Remove Face</button>
+              </div>
+            </div>
+
+            <button type="button" id="btn-webcam" class="btn camera-trigger-btn">
+              <span>📹</span> Snap from Webcam
+            </button>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--panel-border); margin: 0.5rem 0;">
+
+          <!-- Outfit Customizer -->
+          <div class="outfit-customizer">
+            <div class="customizer-row">
+              <label for="color-shirt">Shirt Color</label>
+              <div class="color-picker-wrapper">
+                <input type="color" id="color-shirt" value="#3b82f6"> <!-- Blue default -->
+              </div>
+            </div>
+
+            <div class="customizer-row">
+              <label for="color-pants">Pants Color</label>
+              <div class="color-picker-wrapper">
+                <input type="color" id="color-pants" value="#10b981"> <!-- Green default -->
+              </div>
+            </div>
+
+            <div class="customizer-row">
+              <label for="color-shoes">Shorts/Shoes</label>
+              <div class="color-picker-wrapper">
+                <input type="color" id="color-shoes" value="#f59e0b"> <!-- Orange/Amber default -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode Selector Panel -->
+      <div class="panel">
+        <div class="panel-title">ACTION MODE</div>
+        <div class="mode-selection">
+          <!-- Baseball Mode Card -->
+          <div class="mode-card active" data-mode="baseball">
+            <div class="mode-icon">⚾</div>
+            <h3>BASEBALL</h3>
+            <p>Throw baseballs that bounce & defeat dust bunnies.</p>
+          </div>
+
+          <!-- Basketball Mode Card -->
+          <div class="mode-card" data-mode="basketball">
+            <div class="mode-icon">🏀</div>
+            <h3>BASKETBALL</h3>
+            <p>Throw bouncy basketballs in high, lobbing arcs.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level Seed Panel -->
+      <div class="panel">
+        <div class="panel-title">LEVEL SEED</div>
+        <div class="seed-selection-wrapper">
+          <input type="text" id="level-seed-input" maxlength="5" placeholder="HOUSE" value="HOUSE" style="text-transform: uppercase;">
+          <button type="button" id="btn-apply-seed" class="btn" style="padding: 6px; font-size: 10px; flex: 1;">Apply</button>
+          <button type="button" id="btn-random-seed" class="btn" style="padding: 6px; font-size: 10px; flex: 1;">Random</button>
+        </div>
+        <p class="seed-display-msg">Active Seed: <span id="current-seed-lbl" class="seed-lbl">HOUSE</span></p>
+      </div>
+
+      <!-- Key Bindings Panel -->
+      <div class="panel">
+        <div class="panel-title">CONTROLS</div>
+        <div class="instructions-list">
+          <div class="instruction-item">
+            <span>Move Left / Right</span>
+            <div><span class="key-tag">A</span> or <span class="key-tag">←</span> & <span class="key-tag">D</span> or <span class="key-tag">→</span></div>
+          </div>
+          <div class="instruction-item">
+            <span>Jump / Double Jump</span>
+            <div><span class="key-tag">W</span> or <span class="key-tag">↑</span> or <span class="key-tag">SPACE</span></div>
+          </div>
+          <div class="instruction-item">
+            <span>Throw (Hold to Charge)</span>
+            <div><span class="key-tag">K</span> or <span class="key-tag">ENTER</span> or <span class="key-tag">CLICK</span></div>
+          </div>
+          <div class="instruction-item">
+            <span>Aim Up / Down</span>
+            <div>Hold Throw + <span class="key-tag">W</span> / <span class="key-tag">S</span> (or <span class="key-tag">↑</span> / <span class="key-tag">↓</span>)</div>
+          </div>
+          <div class="instruction-item">
+            <span>Restart Level</span>
+            <div><span class="key-tag">R</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Webcam Viewfinder Modal Overlay -->
+  <div id="webcam-overlay" class="webcam-viewfinder-overlay">
+    <div class="webcam-modal">
+      <div class="panel-title">WEBCAM CAPTURE</div>
+      <div class="webcam-viewfinder">
+        <video id="webcam-video" class="webcam-video" autoplay playsinline></video>
+        <div class="webcam-crop-guide"></div>
+        <div id="webcam-countdown" class="webcam-countdown">3</div>
+      </div>
+      <div class="webcam-buttons">
+        <button type="button" id="btn-capture" class="btn">⚡ Capture Face</button>
+        <button type="button" id="btn-close-webcam" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Face Editor Modal Overlay -->
+  <div id="face-editor-overlay" class="webcam-viewfinder-overlay" style="display: none; justify-content: center; align-items: center;">
+    <div class="webcam-modal" style="width: 320px; align-items: center;">
+      <div class="panel-title" style="margin-bottom: 1rem; width: 100%; text-align: center;">EDIT FACE SPRITE</div>
+      
+      <div style="width: 192px; height: 192px; border: 3px solid var(--primary-glow); border-radius: 8px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); margin-bottom: 0.75rem;">
+        <canvas id="editor-canvas" width="128" height="128" style="width: 100%; height: 100%; image-rendering: pixelated; cursor: crosshair;"></canvas>
+      </div>
+      
+      <p style="font-size: 7px; color: var(--text-muted); margin: 0.5rem 0; text-align: center; text-transform: uppercase; line-height: 1.4;">Drag on face to erase background</p>
+      
+      <div style="display: flex; gap: 0.4rem; width: 100%; margin-bottom: 0.75rem;">
+        <button type="button" id="btn-editor-undo" class="btn btn-secondary" style="flex: 1.1; font-size: 8px; padding: 6px 4px;">↩️ Undo</button>
+        <button type="button" id="btn-editor-revert-auto" class="btn btn-secondary" style="flex: 1.3; font-size: 8px; padding: 6px 4px;">🔄 Auto Mask</button>
+        <button type="button" id="btn-editor-revert-photo" class="btn btn-secondary" style="flex: 1.3; font-size: 8px; padding: 6px 4px;">📷 Raw Photo</button>
+      </div>
+      
+      <div style="display: flex; gap: 0.5rem; width: 100%;">
+        <button type="button" id="btn-editor-cancel" class="btn btn-secondary" style="flex: 1; font-size: 9px; padding: 8px;">Cancel</button>
+        <button type="button" id="btn-editor-done" class="btn" style="flex: 1; font-size: 9px; padding: 8px;">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Entry Point -->
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

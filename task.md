@@ -1,0 +1,32 @@
+- [x] Implement `audio.js` upgraded to 16-bit polyphonic chiptune synths
+- [x] Implement `style.css` with arcade theme and pixel retro design
+- [x] Implement `index.html` structure (customization, webcam viewfinder, and canvas overlays)
+- [x] Implement `game.js`
+  - [x] Implement pixelation engine for webcam/uploaded images
+  - [x] Implement player physics and 16-bit shaded rendering (outlines & highlights)
+  - [x] Implement suburban tile/sprite drawing (beds, couches, stairs, 16-bit bevel platforms)
+  - [x] Implement Baseball Mode (throwing mechanics and collision)
+  - [x] Replace Drumming Mode with Basketball Mode
+  - [x] Implement 4x bigger player bobblehead rendering (64x64)
+  - [x] Implement target systems (Basketball Hoop, Baseball Net Rebounder + Bag)
+  - [x] Implement Heart and Speed Powerups spawned by targets
+  - [x] Fix ball collisions bypassing jump-through platforms
+  - [x] Fix jumping loops by checking keydown repeats
+  - [x] Add explicit trampolines with spring visual elements and green particle bursts
+  - [x] Implement Secret Hideout room (playable drum kit, electric guitar, monster truck)
+  - [x] Implement second Secret Hideout: Sports Minigame Room (Baseball Batting / Basketball Hoop)
+  - [x] Implement 16-bit outlined and detailed enemies (dust bunnies, vacuum cleaners, cat-boss)
+  - [x] Implement stomping/jumping on enemies (dust bunnies, vacuums, cat-boss) to damage/defeat them
+  - [x] Add Start Screen keyboard choice [A] Baseball vs. [B] Basketball
+  - [x] Implement Seeded Procedural Level Generation (PRNG and 5-letter seed codes)
+  - [x] Implement staircase step assist and jump-through furniture physics
+  - [x] Implement crouch drop-through platform mechanics (S + A/D)
+  - [x] Implement interactive click-to-enlarge Face Editor Modal overlay
+  - [x] Implement multi-step Undo (↩️) and original clip Revert (🔄) in face editor
+  - [x] Implement smart Convexity Corner Sweep background shearing relative to face center (64, 64)
+  - [x] Implement Radial Sobel Edge Contour Detector to automatically segment the face boundary contour
+  - [x] Implement centered 64x64 inner box face preservation safeguard (skip clipping inside [32, 96])
+  - [x] Implement dual-mode reversion controls ("Auto Mask" to restore contour, "Raw Photo" to erase mask)
+  - [x] Implement scrolling camera and game loop logic
+- [x] Verify physics, custom outfits, webcam snaps, and playability
+- [x] Update walkthrough.md summarizing features and verification results

@@ -1,0 +1,8 @@
+{
+  "name": "suburban-platformer",
+  "version": "1.0.0",
+  "description": "8-bit suburban platformer game",
+  "scripts": {
+    "dev": "npx -y serve ."
+  }
+}
