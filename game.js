@@ -4736,17 +4736,19 @@ tick();
   });
 
   // Joystick state variables
-  let joystickTouchId = null;
+  let joystickPointerId = null;
   let joystickCenter = { x: 0, y: 0 };
   const maxDragRadius = 40; // in pixels
   const joystickThreshold = 12; // deadzone threshold
 
   function handleJoystickStart(e) {
     e.preventDefault();
-    if (joystickTouchId !== null) return; // Only track one touch for joystick
+    if (joystickPointerId !== null) return; // Only track one pointer at a time
 
-    const touch = e.changedTouches[0];
-    joystickTouchId = touch.identifier;
+    joystickPointerId = e.pointerId;
+    try {
+      joystickBase.setPointerCapture(e.pointerId);
+    } catch (err) {}
 
     // Calculate center of base in viewport coordinates
     const rect = joystickBase.getBoundingClientRect();
@@ -4759,22 +4761,12 @@ tick();
   }
 
   function handleJoystickMove(e) {
-    if (joystickTouchId === null) return;
-
-    let targetTouch = null;
-    for (let i = 0; i < e.touches.length; i++) {
-      if (e.touches[i].identifier === joystickTouchId) {
-        targetTouch = e.touches[i];
-        break;
-      }
-    }
-
-    if (!targetTouch) return;
+    if (joystickPointerId === null || e.pointerId !== joystickPointerId) return;
     e.preventDefault();
 
     // Displacement
-    let dx = targetTouch.clientX - joystickCenter.x;
-    let dy = targetTouch.clientY - joystickCenter.y;
+    let dx = e.clientX - joystickCenter.x;
+    let dy = e.clientY - joystickCenter.y;
     const dist = Math.hypot(dx, dy);
 
     // Clamp
@@ -4817,22 +4809,16 @@ tick();
   }
 
   function handleJoystickEnd(e) {
-    if (joystickTouchId === null) return;
-
-    let ended = false;
-    for (let i = 0; i < e.changedTouches.length; i++) {
-      if (e.changedTouches[i].identifier === joystickTouchId) {
-        ended = true;
-        break;
-      }
-    }
-
-    if (!ended) return;
+    if (joystickPointerId === null || e.pointerId !== joystickPointerId) return;
     e.preventDefault();
 
-    // Reset knob position and touch ID
+    try {
+      joystickBase.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+
+    // Reset knob position and pointer ID
     joystickKnob.style.transform = 'translate(0px, 0px)';
-    joystickTouchId = null;
+    joystickPointerId = null;
 
     // Release movement/aim keys
     simulateKeyUp('a');
@@ -4841,51 +4827,51 @@ tick();
     simulateKeyUp('s');
   }
 
-  // Bind joystick touch events
-  joystickBase.addEventListener('touchstart', handleJoystickStart, { passive: false });
-  window.addEventListener('touchmove', handleJoystickMove, { passive: false });
-  window.addEventListener('touchend', handleJoystickEnd, { passive: false });
-  window.addEventListener('touchcancel', handleJoystickEnd, { passive: false });
+  // Bind joystick pointer events
+  joystickBase.addEventListener('pointerdown', handleJoystickStart);
+  window.addEventListener('pointermove', handleJoystickMove);
+  window.addEventListener('pointerup', handleJoystickEnd);
+  window.addEventListener('pointercancel', handleJoystickEnd);
 
-  // Buttons Touch Handlers
-  btnTouchJump.addEventListener('touchstart', (e) => {
+  // Buttons Pointer Handlers
+  btnTouchJump.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     if (typeof player !== 'undefined' && typeof player.triggerJump === 'function') {
       player.triggerJump();
     } else {
       simulateKeyDown(' ');
     }
-  }, { passive: false });
+  });
 
-  btnTouchJump.addEventListener('touchend', (e) => {
+  btnTouchJump.addEventListener('pointerup', (e) => {
     e.preventDefault();
     simulateKeyUp(' ');
-  }, { passive: false });
+  });
 
-  btnTouchJump.addEventListener('touchcancel', (e) => {
+  btnTouchJump.addEventListener('pointercancel', (e) => {
     e.preventDefault();
     simulateKeyUp(' ');
-  }, { passive: false });
+  });
 
-  btnTouchAction.addEventListener('touchstart', (e) => {
+  btnTouchAction.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     simulateKeyDown('k'); // 'k' simulates Throw/Swing Action
-  }, { passive: false });
+  });
 
-  btnTouchAction.addEventListener('touchend', (e) => {
+  btnTouchAction.addEventListener('pointerup', (e) => {
     e.preventDefault();
     simulateKeyUp('k');
-  }, { passive: false });
+  });
 
-  btnTouchAction.addEventListener('touchcancel', (e) => {
+  btnTouchAction.addEventListener('pointercancel', (e) => {
     e.preventDefault();
     simulateKeyUp('k');
-  }, { passive: false });
+  });
 
-  // Safety cleanup: release all keys if no touches are active
-  window.addEventListener('touchend', (e) => {
-    if (e.touches.length === 0) {
-      joystickTouchId = null;
+  // Safety cleanup: release all keys if no pointers are active
+  window.addEventListener('pointerup', (e) => {
+    if (e.buttons === 0) {
+      joystickPointerId = null;
       joystickKnob.style.transform = 'translate(0px, 0px)';
       for (const key in activeVirtualKeys) {
         if (activeVirtualKeys[key]) {
