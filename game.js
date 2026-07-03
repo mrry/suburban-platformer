@@ -66,7 +66,8 @@ const camera = {
 const keys = {};
 window.addEventListener('keydown', (e) => {
   if (e.repeat) return; // Prevent jump loops / keydown repeat spam!
-  const key = e.key.toLowerCase();
+  let key = e.key.toLowerCase();
+  if (key === ' ') key = 'space';
   keys[key] = true;
   
   if (key === 'r') {
@@ -143,12 +144,13 @@ window.addEventListener('keydown', (e) => {
     }
   }
   // Prevent space/arrow scrolling default browser behavior
-  if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
+  if (['space', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
     e.preventDefault();
   }
 });
 window.addEventListener('keyup', (e) => {
-  const key = e.key.toLowerCase();
+  let key = e.key.toLowerCase();
+  if (key === ' ') key = 'space';
   keys[key] = false;
   
   if ((key === 'k' || e.key === 'Enter') && (currentState === GAME_STATE.PLAYING || currentState === GAME_STATE.SECRET_ROOM || currentState === GAME_STATE.SECRET_MINIGAME_ROOM) && player.isCharging) {
