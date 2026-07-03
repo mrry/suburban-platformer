@@ -4673,12 +4673,22 @@ tick();
   function simulateKeyDown(keyStr) {
     if (activeVirtualKeys[keyStr]) return;
     activeVirtualKeys[keyStr] = true;
+    
+    let mappedKey = keyStr;
+    if (mappedKey === ' ') mappedKey = 'space';
+    keys[mappedKey] = true;
+    
     window.dispatchEvent(new KeyboardEvent('keydown', { key: keyStr }));
   }
 
   function simulateKeyUp(keyStr) {
     if (!activeVirtualKeys[keyStr]) return;
     activeVirtualKeys[keyStr] = false;
+    
+    let mappedKey = keyStr;
+    if (mappedKey === ' ') mappedKey = 'space';
+    keys[mappedKey] = false;
+    
     window.dispatchEvent(new KeyboardEvent('keyup', { key: keyStr }));
   }
 
