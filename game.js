@@ -4679,10 +4679,10 @@ tick();
 // TOUCH CONTROLS OVERLAY SETUP
 // ----------------------------------------------------
 (function initTouchControls() {
-  const touchControls = document.getElementById('touch-controls-overlay');
+  const crtMonitor = document.querySelector('.crt-monitor');
   const toggleTouchCheckbox = document.getElementById('toggle-touch-controls');
 
-  if (!touchControls || !toggleTouchCheckbox) return;
+  if (!crtMonitor || !toggleTouchCheckbox) return;
 
   const joystickBase = document.getElementById('joystick-base');
   const joystickKnob = document.getElementById('joystick-knob');
@@ -4718,14 +4718,14 @@ tick();
   const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
   toggleTouchCheckbox.checked = isTouchDevice;
   if (isTouchDevice) {
-    touchControls.style.display = 'flex';
+    crtMonitor.classList.add('touch-controls-active');
   }
 
   toggleTouchCheckbox.addEventListener('change', (e) => {
     if (e.target.checked) {
-      touchControls.style.display = 'flex';
+      crtMonitor.classList.add('touch-controls-active');
     } else {
-      touchControls.style.display = 'none';
+      crtMonitor.classList.remove('touch-controls-active');
       // Release all virtual keys
       for (const key in activeVirtualKeys) {
         if (activeVirtualKeys[key]) {
