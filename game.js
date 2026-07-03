@@ -3152,6 +3152,18 @@ function updateHUD() {
     else heartStr += '🖤'; // lost heart
   }
   document.getElementById('hud-hp').innerText = heartStr;
+
+  // Update virtual touchscreen action button label if present
+  const btnAction = document.getElementById('btn-touch-action');
+  if (btnAction) {
+    if (currentState === GAME_STATE.SECRET_MINIGAME_ROOM && player.mode === 'baseball') {
+      btnAction.innerText = 'SWING';
+    } else if (player.mode === 'baseball') {
+      btnAction.innerText = 'THROW';
+    } else {
+      btnAction.innerText = 'LOB';
+    }
+  }
 }
 
 // Main Game Loop Updates
@@ -3945,6 +3957,128 @@ const previewCanvas = document.getElementById('preview-canvas');
 const previewCtx = previewCanvas.getContext('2d');
 const btnRemoveFace = document.getElementById('btn-remove-face');
 let editorInitialImageData = null;
+let editorUnmaskedImageData = null;
+
+// Serialization & LocalStorage helpers
+function imageDataToDataURL(imageData) {
+  if (!imageData) return null;
+  const canvas = document.createElement('canvas');
+  canvas.width = imageData.width;
+  canvas.height = imageData.height;
+  const ctx = canvas.getContext('2d');
+  ctx.putImageData(imageData, 0, 0);
+  return canvas.toDataURL();
+}
+
+function saveFaceToLocalStorage() {
+  try {
+    if (player.faceCanvas) {
+      localStorage.setItem('suburban_player_face', previewCanvas.toDataURL());
+      if (editorInitialImageData) {
+        localStorage.setItem('suburban_player_face_initial', imageDataToDataURL(editorInitialImageData));
+      } else {
+        localStorage.removeItem('suburban_player_face_initial');
+      }
+      if (editorUnmaskedImageData) {
+        localStorage.setItem('suburban_player_face_unmasked', imageDataToDataURL(editorUnmaskedImageData));
+      } else {
+        localStorage.removeItem('suburban_player_face_unmasked');
+      }
+    } else {
+      localStorage.removeItem('suburban_player_face');
+      localStorage.removeItem('suburban_player_face_initial');
+      localStorage.removeItem('suburban_player_face_unmasked');
+    }
+  } catch (e) {
+    console.error('Failed to save face to localStorage:', e);
+  }
+}
+
+function saveColorsToLocalStorage() {
+  try {
+    localStorage.setItem('suburban_shirt_color', player.shirtColor);
+    localStorage.setItem('suburban_pants_color', player.pantsColor);
+    localStorage.setItem('suburban_shoes_color', player.shoesColor);
+  } catch (e) {
+    console.error('Failed to save outfit colors to localStorage:', e);
+  }
+}
+
+function loadCustomizations() {
+  try {
+    // Colors
+    const savedShirt = localStorage.getItem('suburban_shirt_color');
+    if (savedShirt) {
+      player.shirtColor = savedShirt;
+      const inputShirt = document.getElementById('color-shirt');
+      if (inputShirt) inputShirt.value = savedShirt;
+    }
+    const savedPants = localStorage.getItem('suburban_pants_color');
+    if (savedPants) {
+      player.pantsColor = savedPants;
+      const inputPants = document.getElementById('color-pants');
+      if (inputPants) inputPants.value = savedPants;
+    }
+    const savedShoes = localStorage.getItem('suburban_shoes_color');
+    if (savedShoes) {
+      player.shoesColor = savedShoes;
+      const inputShoes = document.getElementById('color-shoes');
+      if (inputShoes) inputShoes.value = savedShoes;
+    }
+
+    // Face Canvas
+    const savedFace = localStorage.getItem('suburban_player_face');
+    if (savedFace) {
+      const img = new Image();
+      img.onload = () => {
+        previewCtx.clearRect(0, 0, 128, 128);
+        previewCtx.drawImage(img, 0, 0);
+        player.faceCanvas = previewCanvas;
+        
+        // Show face preview and hide upload zone
+        if (uploadZone) uploadZone.style.display = 'none';
+        if (previewWrapper) previewWrapper.style.display = 'flex';
+        
+        // Load editor states if available
+        const savedInitial = localStorage.getItem('suburban_player_face_initial');
+        if (savedInitial) {
+          const imgInit = new Image();
+          imgInit.onload = () => {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 128;
+            tempCanvas.height = 128;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(imgInit, 0, 0);
+            editorInitialImageData = tempCtx.getImageData(0, 0, 128, 128);
+          };
+          imgInit.src = savedInitial;
+        } else {
+          editorInitialImageData = previewCtx.getImageData(0, 0, 128, 128);
+        }
+        
+        const savedUnmasked = localStorage.getItem('suburban_player_face_unmasked');
+        if (savedUnmasked) {
+          const imgUnmasked = new Image();
+          imgUnmasked.onload = () => {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 128;
+            tempCanvas.height = 128;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(imgUnmasked, 0, 0);
+            editorUnmaskedImageData = tempCtx.getImageData(0, 0, 128, 128);
+          };
+          imgUnmasked.src = savedUnmasked;
+        } else {
+          editorUnmaskedImageData = previewCtx.getImageData(0, 0, 128, 128);
+        }
+      };
+      img.src = savedFace;
+    }
+  } catch (e) {
+    console.error('Failed to load customizations from localStorage:', e);
+  }
+}
+
 
 // Pixelate source image and apply filters
 function processFaceImage(imgSource) {
@@ -4086,6 +4220,8 @@ function processFaceImage(imgSource) {
   // Show UI elements
   uploadZone.style.display = 'none';
   previewWrapper.style.display = 'flex';
+  
+  saveFaceToLocalStorage();
 }
 
 // Face Editor Modal & Undo/Revert Controls
@@ -4267,6 +4403,8 @@ btnEditorDone.addEventListener('click', () => {
   // Hide overlay
   editorOverlay.style.display = 'none';
   isErasingInEditor = false;
+  
+  saveFaceToLocalStorage();
 });
 
 // Set cursor style to indicate clickability
@@ -4319,6 +4457,7 @@ btnRemoveFace.addEventListener('click', () => {
   faceInput.value = '';
   uploadZone.style.display = 'flex';
   previewWrapper.style.display = 'none';
+  saveFaceToLocalStorage();
 });
 
 // ----------------------------------------------------
@@ -4408,12 +4547,15 @@ btnCapture.addEventListener('click', () => {
 // ----------------------------------------------------
 document.getElementById('color-shirt').addEventListener('input', (e) => {
   player.shirtColor = e.target.value;
+  saveColorsToLocalStorage();
 });
 document.getElementById('color-pants').addEventListener('input', (e) => {
   player.pantsColor = e.target.value;
+  saveColorsToLocalStorage();
 });
 document.getElementById('color-shoes').addEventListener('input', (e) => {
   player.shoesColor = e.target.value;
+  saveColorsToLocalStorage();
 });
 
 // ----------------------------------------------------
@@ -4475,6 +4617,9 @@ seedInput.addEventListener('keydown', (e) => {
 // ----------------------------------------------------
 // INITIALIZATION
 // ----------------------------------------------------
+// Load customization states from localStorage
+loadCustomizations();
+
 // Setup initial canvas dimensions & HUD
 buildLevel();
 spawnEnemies();
@@ -4505,3 +4650,284 @@ function tick() {
 
 // Kickstart
 tick();
+
+// ----------------------------------------------------
+// TOUCH CONTROLS OVERLAY SETUP
+// ----------------------------------------------------
+(function initTouchControls() {
+  const touchControls = document.getElementById('touch-controls-overlay');
+  const toggleTouchCheckbox = document.getElementById('toggle-touch-controls');
+
+  if (!touchControls || !toggleTouchCheckbox) return;
+
+  const joystickBase = document.getElementById('joystick-base');
+  const joystickKnob = document.getElementById('joystick-knob');
+  const btnTouchJump = document.getElementById('btn-touch-jump');
+  const btnTouchAction = document.getElementById('btn-touch-action');
+
+  // Virtual key states to prevent duplicate events
+  const activeVirtualKeys = {};
+
+  function simulateKeyDown(keyStr) {
+    if (activeVirtualKeys[keyStr]) return;
+    activeVirtualKeys[keyStr] = true;
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: keyStr }));
+  }
+
+  function simulateKeyUp(keyStr) {
+    if (!activeVirtualKeys[keyStr]) return;
+    activeVirtualKeys[keyStr] = false;
+    window.dispatchEvent(new KeyboardEvent('keyup', { key: keyStr }));
+  }
+
+  // Detect touch capability on load
+  const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  toggleTouchCheckbox.checked = isTouchDevice;
+  if (isTouchDevice) {
+    touchControls.style.display = 'flex';
+  }
+
+  toggleTouchCheckbox.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      touchControls.style.display = 'flex';
+    } else {
+      touchControls.style.display = 'none';
+      // Release all virtual keys
+      for (const key in activeVirtualKeys) {
+        if (activeVirtualKeys[key]) {
+          simulateKeyUp(key);
+        }
+      }
+    }
+  });
+
+  // Joystick state variables
+  let joystickTouchId = null;
+  let joystickCenter = { x: 0, y: 0 };
+  const maxDragRadius = 40; // in pixels
+  const joystickThreshold = 12; // deadzone threshold
+
+  function handleJoystickStart(e) {
+    e.preventDefault();
+    if (joystickTouchId !== null) return; // Only track one touch for joystick
+
+    const touch = e.changedTouches[0];
+    joystickTouchId = touch.identifier;
+
+    // Calculate center of base in viewport coordinates
+    const rect = joystickBase.getBoundingClientRect();
+    joystickCenter = {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2
+    };
+
+    handleJoystickMove(e);
+  }
+
+  function handleJoystickMove(e) {
+    if (joystickTouchId === null) return;
+
+    let targetTouch = null;
+    for (let i = 0; i < e.touches.length; i++) {
+      if (e.touches[i].identifier === joystickTouchId) {
+        targetTouch = e.touches[i];
+        break;
+      }
+    }
+
+    if (!targetTouch) return;
+    e.preventDefault();
+
+    // Displacement
+    let dx = targetTouch.clientX - joystickCenter.x;
+    let dy = targetTouch.clientY - joystickCenter.y;
+    const dist = Math.hypot(dx, dy);
+
+    // Clamp
+    if (dist > maxDragRadius) {
+      dx = (dx / dist) * maxDragRadius;
+      dy = (dy / dist) * maxDragRadius;
+    }
+
+    // Move knob visually
+    joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+
+    // Map to virtual keys: Left/Right
+    if (dx < -joystickThreshold) {
+      simulateKeyDown('a');
+      simulateKeyUp('d');
+    } else if (dx > joystickThreshold) {
+      simulateKeyDown('d');
+      simulateKeyUp('a');
+    } else {
+      simulateKeyUp('a');
+      simulateKeyUp('d');
+    }
+
+    // Map to virtual keys: Up/Down (only when charging or down for crouching)
+    const isCharging = (typeof player !== 'undefined') && player.isCharging;
+    if (dy < -joystickThreshold) {
+      if (isCharging) {
+        simulateKeyDown('w');
+      } else {
+        simulateKeyUp('w');
+      }
+      simulateKeyUp('s');
+    } else if (dy > joystickThreshold) {
+      simulateKeyDown('s');
+      simulateKeyUp('w');
+    } else {
+      simulateKeyUp('w');
+      simulateKeyUp('s');
+    }
+  }
+
+  function handleJoystickEnd(e) {
+    if (joystickTouchId === null) return;
+
+    let ended = false;
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      if (e.changedTouches[i].identifier === joystickTouchId) {
+        ended = true;
+        break;
+      }
+    }
+
+    if (!ended) return;
+    e.preventDefault();
+
+    // Reset knob position and touch ID
+    joystickKnob.style.transform = 'translate(0px, 0px)';
+    joystickTouchId = null;
+
+    // Release movement/aim keys
+    simulateKeyUp('a');
+    simulateKeyUp('d');
+    simulateKeyUp('w');
+    simulateKeyUp('s');
+  }
+
+  // Bind joystick touch events
+  joystickBase.addEventListener('touchstart', handleJoystickStart, { passive: false });
+  window.addEventListener('touchmove', handleJoystickMove, { passive: false });
+  window.addEventListener('touchend', handleJoystickEnd, { passive: false });
+  window.addEventListener('touchcancel', handleJoystickEnd, { passive: false });
+
+  // Buttons Touch Handlers
+  btnTouchJump.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    simulateKeyDown(' '); // Space simulates Jump
+  }, { passive: false });
+
+  btnTouchJump.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    simulateKeyUp(' ');
+  }, { passive: false });
+
+  btnTouchJump.addEventListener('touchcancel', (e) => {
+    e.preventDefault();
+    simulateKeyUp(' ');
+  }, { passive: false });
+
+  btnTouchAction.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    simulateKeyDown('k'); // 'k' simulates Throw/Swing Action
+  }, { passive: false });
+
+  btnTouchAction.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    simulateKeyUp('k');
+  }, { passive: false });
+
+  btnTouchAction.addEventListener('touchcancel', (e) => {
+    e.preventDefault();
+    simulateKeyUp('k');
+  }, { passive: false });
+
+  // Safety cleanup: release all keys if no touches are active
+  window.addEventListener('touchend', (e) => {
+    if (e.touches.length === 0) {
+      joystickTouchId = null;
+      joystickKnob.style.transform = 'translate(0px, 0px)';
+      for (const key in activeVirtualKeys) {
+        if (activeVirtualKeys[key]) {
+          simulateKeyUp(key);
+        }
+      }
+    }
+  });
+})();
+
+// ----------------------------------------------------
+// FULLSCREEN MODE HANDLER
+// ----------------------------------------------------
+(function initFullscreenControls() {
+  const crtMonitor = document.querySelector('.crt-monitor');
+  const btnSidebarFullscreen = document.getElementById('btn-sidebar-fullscreen');
+  const btnMonitorFullscreen = document.getElementById('btn-monitor-fullscreen');
+
+  if (!crtMonitor) return;
+
+  function toggleFullscreen() {
+    const isCurrentlyFullscreen = document.fullscreenElement || 
+                                  document.webkitFullscreenElement || 
+                                  crtMonitor.classList.contains('css-fullscreen');
+                                  
+    if (!isCurrentlyFullscreen) {
+      // Enter fullscreen
+      if (crtMonitor.requestFullscreen) {
+        crtMonitor.requestFullscreen().catch(err => {
+          enterCSSFullscreen();
+        });
+      } else if (crtMonitor.webkitRequestFullscreen) {
+        crtMonitor.webkitRequestFullscreen();
+      } else {
+        enterCSSFullscreen();
+      }
+    } else {
+      // Exit fullscreen
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(err => {
+          exitCSSFullscreen();
+        });
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else {
+        exitCSSFullscreen();
+      }
+    }
+  }
+
+  function enterCSSFullscreen() {
+    crtMonitor.classList.add('css-fullscreen');
+    updateFullscreenUI(true);
+  }
+
+  function exitCSSFullscreen() {
+    crtMonitor.classList.remove('css-fullscreen');
+    updateFullscreenUI(false);
+  }
+
+  function updateFullscreenUI(isFullscreen) {
+    const text = isFullscreen ? '📺 Exit Fullscreen' : '📺 Enter Fullscreen';
+    if (btnSidebarFullscreen) btnSidebarFullscreen.innerText = text;
+    
+    if (btnMonitorFullscreen) {
+      btnMonitorFullscreen.innerText = isFullscreen ? '✕' : '⛶';
+      btnMonitorFullscreen.title = isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen';
+    }
+  }
+
+  // Bind events
+  if (btnSidebarFullscreen) btnSidebarFullscreen.addEventListener('click', toggleFullscreen);
+  if (btnMonitorFullscreen) btnMonitorFullscreen.addEventListener('click', toggleFullscreen);
+
+  // Listen to native fullscreen changes to keep UI in sync
+  document.addEventListener('fullscreenchange', handleFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+  function handleFullscreenChange() {
+    const isNativeFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    updateFullscreenUI(isNativeFS);
+  }
+})();

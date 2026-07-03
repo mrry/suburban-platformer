@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Suburban 16-Bit Platformer</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -16,6 +16,20 @@
     <div class="game-screen-wrapper">
       <div class="crt-monitor">
         <canvas id="gameCanvas" width="800" height="533"></canvas>
+        <!-- Screen-level Fullscreen Toggle Button -->
+        <button type="button" id="btn-monitor-fullscreen" class="monitor-fullscreen-btn" title="Toggle Fullscreen">⛶</button>
+        <!-- Touch Controls Overlay -->
+        <div id="touch-controls-overlay" class="touch-controls-overlay" style="display: none;">
+          <div class="touch-joystick-area">
+            <div id="joystick-base" class="joystick-base">
+              <div id="joystick-knob" class="joystick-knob"></div>
+            </div>
+          </div>
+          <div class="touch-buttons-area">
+            <button type="button" id="btn-touch-action" class="touch-btn action-btn">THROW</button>
+            <button type="button" id="btn-touch-jump" class="touch-btn jump-btn">JUMP</button>
+          </div>
+        </div>
       </div>
       
       <div class="game-hud-bottom">
@@ -125,6 +139,14 @@
       <div class="panel">
         <div class="panel-title">CONTROLS</div>
         <div class="instructions-list">
+          <div class="instruction-item" style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--panel-border); padding-bottom: 10px;">
+            <span style="font-weight: bold; color: var(--secondary-glow);">On-Screen Controls</span>
+            <label class="switch-container">
+              <input type="checkbox" id="toggle-touch-controls">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+          <button type="button" id="btn-sidebar-fullscreen" class="btn" style="width: 100%; margin-bottom: 12px; font-size: 9px; padding: 10px; text-transform: uppercase;">📺 Enter Fullscreen</button>
           <div class="instruction-item">
             <span>Move Left / Right</span>
             <div><span class="key-tag">A</span> or <span class="key-tag">←</span> & <span class="key-tag">D</span> or <span class="key-tag">→</span></div>

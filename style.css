@@ -581,3 +581,362 @@ canvas {
   color: var(--secondary-glow);
   text-shadow: 0 0 5px rgba(251, 191, 36, 0.4);
 }
+
+/* ----------------------------------------------------
+   TOUCH CONTROLS & TOGGLE SWITCH
+   ---------------------------------------------------- */
+
+/* Custom Toggle Switch */
+.switch-container {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 22px;
+}
+
+.switch-container input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: .3s;
+  border-radius: 22px;
+  border: 1px solid var(--panel-border);
+}
+
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--text-muted);
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .switch-slider {
+  background-color: var(--primary-glow);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+  border-color: var(--primary-glow);
+}
+
+input:checked + .switch-slider:before {
+  transform: translateX(22px);
+  background-color: #ffffff;
+  box-shadow: 0 0 5px #ffffff;
+}
+
+/* Touch Controls Overlay */
+.touch-controls-overlay {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  pointer-events: none;
+  z-index: 15;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  box-sizing: border-box;
+}
+
+.touch-joystick-area,
+.touch-buttons-area {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+}
+
+.touch-joystick-area {
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+
+.touch-buttons-area {
+  margin-right: 10px;
+  margin-bottom: 10px;
+  gap: 20px;
+}
+
+/* Joystick Base */
+.joystick-base {
+  width: 110px;
+  height: 110px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  touch-action: none;
+}
+
+.joystick-base::before {
+  content: '';
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Joystick Knob */
+.joystick-knob {
+  width: 48px;
+  height: 48px;
+  background: radial-gradient(circle, var(--secondary-glow) 0%, rgba(168, 85, 247, 0.8) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  position: absolute;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6), 0 0 10px var(--secondary-glow);
+  cursor: grab;
+  transition: transform 0.05s ease-out, background 0.2s, box-shadow 0.2s;
+  pointer-events: none;
+}
+
+/* Active state for knob */
+.joystick-base:active .joystick-knob {
+  background: radial-gradient(circle, #ffffff 0%, var(--primary-glow) 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 15px var(--primary-glow);
+}
+
+/* Touch Buttons */
+.touch-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 0 8px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  transition: all 0.15s ease;
+}
+
+.touch-btn.jump-btn {
+  border-color: rgba(6, 182, 212, 0.4);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), 0 0 10px rgba(6, 182, 212, 0.2), inset 0 0 8px rgba(0, 0, 0, 0.6);
+  color: #22d3ee;
+}
+
+.touch-btn.jump-btn:active {
+  background: radial-gradient(circle, #ffffff 0%, #06b6d4 100%);
+  border-color: #22d3ee;
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.6), 0 0 20px #22d3ee;
+  transform: scale(0.92);
+}
+
+.touch-btn.action-btn {
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), 0 0 10px rgba(245, 158, 11, 0.2), inset 0 0 8px rgba(0, 0, 0, 0.6);
+  color: #f59e0b;
+  margin-top: -12px;
+}
+
+.touch-btn.action-btn:active {
+  background: radial-gradient(circle, #ffffff 0%, #f59e0b 100%);
+  border-color: #fbbf24;
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.6), 0 0 20px #fbbf24;
+  transform: scale(0.92);
+}
+
+/* Responsive Scaling for Mobile Screens */
+@media (max-width: 768px) {
+  .joystick-base {
+    width: 90px;
+    height: 90px;
+  }
+  .joystick-base::before {
+    width: 60px;
+    height: 60px;
+  }
+  .joystick-knob {
+    width: 40px;
+    height: 40px;
+  }
+  .touch-btn {
+    width: 54px;
+    height: 54px;
+    font-size: 7px;
+  }
+  .touch-buttons-area {
+    gap: 12px;
+  }
+}
+
+/* ----------------------------------------------------
+   FULLSCREEN MODE STYLING
+   ---------------------------------------------------- */
+
+/* Monitor Fullscreen Button */
+.monitor-fullscreen-btn {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(168, 85, 247, 0.6);
+  background: rgba(30, 27, 57, 0.85);
+  color: #ffffff;
+  font-size: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 999; /* Render above scanline and curved glass overlays */
+  transform: translateZ(999px); /* Force GPU compositing above hardware-accelerated canvas */
+  -webkit-transform: translateZ(999px);
+  transition: all 0.2s ease, opacity 0.3s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), 0 0 8px rgba(168, 85, 247, 0.25);
+}
+
+.monitor-fullscreen-btn:hover {
+  background: rgba(168, 85, 247, 0.2);
+  border-color: var(--primary-glow);
+  color: #ffffff;
+  box-shadow: 0 0 10px var(--primary-glow);
+  transform: scale(1.08);
+}
+
+.monitor-fullscreen-btn:active {
+  transform: scale(0.95);
+}
+
+/* Native Fullscreen API Styles */
+.crt-monitor:fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+  border: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background: #000000 !important;
+}
+
+.crt-monitor:fullscreen canvas {
+  width: auto !important;
+  height: 100vh !important;
+  aspect-ratio: 1.5 !important;
+  max-width: 100vw !important;
+  border-radius: 0 !important;
+}
+
+.crt-monitor:fullscreen .monitor-fullscreen-btn {
+  top: 30px !important;
+  right: 30px !important;
+}
+
+.crt-monitor:fullscreen .touch-controls-overlay {
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  padding: 40px !important;
+}
+
+/* Safari/iOS Webkit Prefix Fullscreen API Styles */
+.crt-monitor:-webkit-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+  border: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background: #000000 !important;
+}
+
+.crt-monitor:-webkit-full-screen canvas {
+  width: auto !important;
+  height: 100vh !important;
+  aspect-ratio: 1.5 !important;
+  max-width: 100vw !important;
+  border-radius: 0 !important;
+}
+
+.crt-monitor:-webkit-full-screen .monitor-fullscreen-btn {
+  top: 30px !important;
+  right: 30px !important;
+}
+
+.crt-monitor:-webkit-full-screen .touch-controls-overlay {
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  padding: 40px !important;
+}
+
+/* CSS Fallback Fullscreen (Maximized viewport mode) */
+.crt-monitor.css-fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+  border: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background: #000000 !important;
+  z-index: 99999 !important;
+  aspect-ratio: auto !important;
+}
+
+.crt-monitor.css-fullscreen canvas {
+  width: auto !important;
+  height: 100vh !important;
+  aspect-ratio: 1.5 !important;
+  max-width: 100vw !important;
+  border-radius: 0 !important;
+}
+
+.crt-monitor.css-fullscreen .monitor-fullscreen-btn {
+  top: 30px !important;
+  right: 30px !important;
+}
+
+.crt-monitor.css-fullscreen .touch-controls-overlay {
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  padding: 40px !important;
+}
