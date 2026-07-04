@@ -4871,10 +4871,16 @@ tick();
   // Safety cleanup: release all keys if no pointers are active
   window.addEventListener('pointerup', (e) => {
     if (e.buttons === 0) {
-      joystickPointerId = null;
-      joystickKnob.style.transform = 'translate(0px, 0px)';
+      if (joystickPointerId !== null && e.pointerId === joystickPointerId) {
+        joystickKnob.style.transform = 'translate(0px, 0px)';
+        joystickPointerId = null;
+      }
       for (const key in activeVirtualKeys) {
         if (activeVirtualKeys[key]) {
+          // Do not release joystick direction keys if the joystick pointer is still active
+          if (joystickPointerId !== null && ['a', 'd', 'w', 's'].includes(key)) {
+            continue;
+          }
           simulateKeyUp(key);
         }
       }
