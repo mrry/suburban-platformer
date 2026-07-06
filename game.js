@@ -1,3 +1,5 @@
+console.log("Suburban Retro Runner v1.0.1 - Boss Spawn Fix Active");
+
 // Game Canvas and Context
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -3089,9 +3091,9 @@ function spawnEnemies() {
   enemies.push(new Enemy(atticX + 250, 86, 'vacuum')); // rafter patrol
   
   // M'gee the final boss is always at the end attic region, guarding the trophy.
-  // Boss height is 45, so boss y = 500 - 45 = 455.
+  // Spawn in the air (y = 400) to let gravity land it safely and avoid any boundary float issues.
   const bossX = LEVEL_WIDTH - 260 + seededRandom() * 80;
-  enemies.push(new Enemy(bossX, 455, 'cat-boss'));
+  enemies.push(new Enemy(bossX, 400, 'cat-boss'));
 
   // Flying Toys hovering at transition points
   enemies.push(new Enemy(houseX - 40, 200, 'toy')); // near door entrance
